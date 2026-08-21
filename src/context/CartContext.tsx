@@ -17,10 +17,13 @@ type CartAction =
   | { type: "TOGGLE_CART" }
   | { type: "SET_CART"; payload: CartItem[] };
 
-const CartContext = createContext<{
+interface CartContextType {
   state: CartState;
   dispatch: React.Dispatch<CartAction>;
-} | undefined>(undefined);
+  addToCart: (product: Product) => void;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
@@ -77,8 +80,12 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [state.items, isInitialized]);
 
+  const addToCart = (product: Product) => {
+    dispatch({ type: "ADD_ITEM", payload: product });
+  };
+
   return (
-    <CartContext.Provider value={{ state, dispatch }}>
+    <CartContext.Provider value={{ state, dispatch, addToCart }}>
       {children}
     </CartContext.Provider>
   );
