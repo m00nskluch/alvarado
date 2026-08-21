@@ -14,10 +14,6 @@ export interface Product {
   image_url: string | null;
   is_available: boolean;
   created_at?: string;
-  categories?: {
-    slug: string;
-    name: string;
-  };
 }
 
 export interface CartItem {

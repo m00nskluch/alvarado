@@ -8,10 +8,8 @@ import { useState } from "react";
 
 export const Navbar = () => {
   const pathname = usePathname();
-  const { state, dispatch } = useCart();
+  const { totalItems, isOpen, setIsOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinks = [
     { label: "Inicio", href: "/" },
@@ -71,8 +69,8 @@ export const Navbar = () => {
           </a>
 
           <button
-            onClick={() => dispatch({ type: "TOGGLE_CART" })}
-            className="relative bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+            onClick={() => setIsOpen(!isOpen)}
+            className="relative bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
             aria-label="Ver mi pedido"
           >
             <ShoppingBag className="w-5 h-5" />
