@@ -6,6 +6,8 @@ import { X, Trash2, ShoppingBag, Send, User, MapPin, AlertCircle } from "lucide-
 import { useState } from "react";
 import Image from "next/image";
 
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop";
+
 export const CartDrawer = () => {
   const { state, dispatch } = useCart();
   const [customerName, setCustomerName] = useState("");
@@ -21,11 +23,11 @@ export const CartDrawer = () => {
   const handleSendWhatsApp = () => {
     const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "56912345678";
     
-    let message = `¡Hola Distribuidora Alvarado! Me gustaría realizar el siguiente pedido desde la página web:\n\n`;
+    let message = `Hola Distribuidora Alvarado, necesito el siguiente pedido desde la página web:\n\n`;
     
     state.items.forEach(({ product, quantity }) => {
       const subtotal = product.price * quantity;
-      message += `• ${quantity}x ${product.name} (${product.unit}) -> ${formatCLP(subtotal)}\n`;
+      message += `• ${quantity}x ${product.name} (${product.stock_quantity}) -> ${formatCLP(subtotal)}\n`;
     });
 
     message += `\n*TOTAL ESTIMADO: ${formatCLP(totalCLP)} CLP*\n`;
@@ -40,7 +42,8 @@ export const CartDrawer = () => {
     message += `\n\n¿Tienen disponibilidad para coordinar despacho o retiro en local?`;
 
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, "_blank");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -84,7 +87,7 @@ export const CartDrawer = () => {
               >
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-200">
                   <Image
-                    src={product.image}
+                    src={product.image_url || DEFAULT_IMAGE}
                     alt={product.name}
                     fill
                     sizes="64px"
@@ -95,7 +98,7 @@ export const CartDrawer = () => {
                   <h4 className="font-bold text-xs md:text-sm text-slate-800 leading-tight truncate">
                     {product.name}
                   </h4>
-                  <p className="text-xs text-slate-500">{product.unit}</p>
+                  <p className="text-xs text-slate-500">{product.stock_quantity}</p>
                   <p className="text-emerald-700 font-extrabold text-sm mt-0.5">
                     {formatCLP(product.price * quantity)}
                   </p>
@@ -180,7 +183,7 @@ export const CartDrawer = () => {
               onClick={handleSendWhatsApp}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-98 transition-all"
             >
-              <Send className="w-5 h-5" /> Enviar Pedido a WhatsApp
+              <Send className="w-5 h-5" /> Finalizar Pedido - Enviar Pedido a WhatsApp
             </button>
 
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500 justify-center">

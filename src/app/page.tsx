@@ -1,9 +1,27 @@
 import { CategoryCard } from "@/components/CategoryCard";
+import { CategoryNav } from "@/components/CategoryNav";
 import { ProductGrid } from "@/components/ProductGrid";
+import { getAllProducts } from "@/actions/getProducts";
 import { PRODUCTS } from "@/data/products";
-import { MapPin, Clock, Truck, ShieldCheck, Sparkles } from "lucide-react";
+import { Product } from "@/lib/database.types";
+import { MapPin, Clock, Truck, Sparkles } from "lucide-react";
 
-export default function HomePage() {
+export const revalidate = 0;
+
+export default async function HomePage() {
+  let products: Product[] = [];
+
+  try {
+    products = await getAllProducts();
+  } catch (error) {
+    console.error("Error al obtener todos los productos en HomePage:", error);
+  }
+
+  // Fallback si la base de datos Supabase aún no cuenta con registros cargados
+  if (products.length === 0) {
+    products = PRODUCTS;
+  }
+
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-12">
       {/* Hero Banner Section */}
@@ -24,6 +42,9 @@ export default function HomePage() {
           Venta al por mayor y menor de insumos plásticos industriales, frutas y verduras frescas seleccionadas y productos de limpieza de alto rendimiento.
         </p>
       </section>
+
+      {/* Category Navigation Bar */}
+      <CategoryNav />
 
       {/* Category Redirection Banners */}
       <section className="space-y-6">
@@ -64,7 +85,7 @@ export default function HomePage() {
       {/* Featured Products Overview */}
       <section className="pt-4">
         <ProductGrid
-          products={PRODUCTS}
+          initialProducts={products}
           title="Todos los Productos Disponibles"
           subtitle="Agrega los productos que necesites a tu pedido y envíalo directamente a nuestro WhatsApp."
         />

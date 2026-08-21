@@ -1,22 +1,25 @@
 "use client";
 
-import { Product } from "@/types";
+import { Product } from "@/lib/database.types";
 import { ProductCard } from "./ProductCard";
 import { useState } from "react";
 import { Search, PackageX } from "lucide-react";
 
 interface ProductGridProps {
-  products: Product[];
+  initialProducts?: Product[];
+  products?: Product[];
   title?: string;
   subtitle?: string;
 }
 
-export const ProductGrid = ({ products, title, subtitle }: ProductGridProps) => {
+export const ProductGrid = ({ initialProducts, products, title, subtitle }: ProductGridProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredProducts = products.filter((product) =>
+  const activeProducts = initialProducts || products || [];
+
+  const filteredProducts = activeProducts.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.unit.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.stock_quantity && product.stock_quantity.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -57,7 +60,9 @@ export const ProductGrid = ({ products, title, subtitle }: ProductGridProps) => 
           <PackageX className="w-12 h-12 text-slate-300 mx-auto" />
           <h3 className="text-lg font-bold text-slate-700">No se encontraron productos</h3>
           <p className="text-sm text-slate-500 max-w-md mx-auto">
-            No hay ningún artículo que coincida con &quot;{searchTerm}&quot;. Intenta buscar con otro término.
+            {searchTerm
+              ? `No hay ningún artículo que coincida con "${searchTerm}". Intenta buscar con otro término.`
+              : "No hay productos disponibles en este catálogo por el momento."}
           </p>
         </div>
       ) : (

@@ -76,7 +76,7 @@ export const Navbar = () => {
             aria-label="Ver mi pedido"
           >
             <ShoppingBag className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm font-bold">Mi Pedido</span>
+            <span className="hidden sm:inline text-sm font-bold">Carrito</span>
             {totalItems > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
                 {totalItems}

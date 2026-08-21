@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, useEffect, useState } from "react";
-import { Product, CartItem } from "@/types";
+import { Product } from "@/lib/database.types";
+import { CartItem } from "@/types";
 
 interface CartState {
   items: CartItem[];
@@ -64,7 +65,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         dispatch({ type: "SET_CART", payload: JSON.parse(localData) });
       } catch (e) {
-        console.error("Error parsing cart storage", e);
+        console.error("Error al leer el carrito de localStorage:", e);
       }
     }
     setIsInitialized(true);

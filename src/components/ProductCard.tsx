@@ -1,15 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Product } from "@/types";
+import { Product } from "@/lib/database.types";
 import { useCart } from "@/context/CartContext";
 import { formatCLP } from "@/lib/utils";
-import { Plus, Check, ShoppingBag, Minus } from "lucide-react";
+import { Plus, Check, Minus } from "lucide-react";
 import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
 }
+
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop";
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { state, dispatch } = useCart();
@@ -35,21 +37,23 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
+  const imageUrl = product.image_url || DEFAULT_IMAGE;
+
   return (
     <div className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between">
       <div>
         <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
           <Image
-            src={product.image}
+            src={imageUrl}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 bg-slate-900/80 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-md">
-            {product.unit}
+            {product.stock_quantity}
           </div>
-          {product.inStock ? (
+          {product.is_available ? (
             <div className="absolute top-3 right-3 bg-emerald-500/90 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full shadow">
               En Stock
             </div>
@@ -64,11 +68,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <h3 className="font-bold text-slate-800 text-base leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">
             {product.name}
           </h3>
-          {product.description && (
-            <p className="text-xs text-slate-500 line-clamp-2">
-              {product.description}
-            </p>
-          )}
         </div>
       </div>
 
@@ -108,7 +107,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         ) : (
           <button
             onClick={handleAddToCart}
-            disabled={!product.inStock}
+            disabled={!product.is_available}
             className={`w-full py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md ${
               addedAnimation
                 ? "bg-emerald-800 text-white scale-98"
