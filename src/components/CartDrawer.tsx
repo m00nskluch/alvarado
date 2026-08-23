@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
-import { X, Trash2, Plus, Minus, Send } from 'lucide-react';
+import { X, Trash2, Plus, Minus, Send, ImageOff } from 'lucide-react';
 
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart();
@@ -40,6 +41,21 @@ export function CartDrawer() {
             ) : (
               items.map(({ product, quantity }) => (
                 <div key={product.id} className="py-3 flex items-center justify-between gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
+                    {product.image_url ? (
+                      <Image
+                        src={product.image_url}
+                        alt={product.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-slate-300">
+                        <ImageOff className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm text-gray-900 truncate">{product.name}</h4>
                     <span className="text-xs text-gray-500">${product.price.toLocaleString('es-CL')} c/u</span>
