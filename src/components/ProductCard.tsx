@@ -1,8 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { Product } from '@/lib/database.types';
 import { useCart } from '@/context/CartContext';
-import { Plus } from 'lucide-react';
+import { Plus, ImageOff } from 'lucide-react';
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -10,6 +11,22 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
       <div>
+        <div className="relative h-40 w-full overflow-hidden rounded-lg bg-slate-100 mb-3">
+          {product.image_url ? (
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-slate-300">
+              <ImageOff className="w-8 h-8" />
+            </div>
+          )}
+        </div>
+
         <span className="text-xs font-semibold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full inline-block mb-2">
           {product.stock_quantity ? `Formato: ${product.stock_quantity}` : 'Disponible'}
         </span>

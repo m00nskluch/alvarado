@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "images:source": "tsx scripts/source-product-images.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
@@ -26,7 +27,9 @@
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
+    "sharp": "^0.35.3",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.12",
     "typescript": "^5.3.3"
   }
 }
