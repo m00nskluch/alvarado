@@ -1,44 +1,73 @@
 import { CategoryCard } from "@/components/CategoryCard";
 import { CategoryNav } from "@/components/CategoryNav";
 import { ProductGrid } from "@/components/ProductGrid";
+import { ProductCarousel } from "@/components/ProductCarousel";
 import { getAllProducts } from "@/actions/getProducts";
+import { getFeaturedProducts } from "@/actions/get-products";
 import { PRODUCTS } from "@/data/products";
 import { Product } from "@/lib/database.types";
-import { MapPin, Clock, Truck, Sparkles } from "lucide-react";
+import { MapPin, Clock, Truck, Sparkles, Leaf } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function HomePage() {
   let products: Product[] = [];
+  let featuredProducts: Product[] = [];
 
   try {
-    products = await getAllProducts();
+    const [allData, featuredData] = await Promise.all([
+      getAllProducts(),
+      getFeaturedProducts(12),
+    ]);
+    products = allData;
+    featuredProducts = featuredData;
   } catch (error) {
-    console.error("Error al obtener todos los productos en HomePage:", error);
+    console.error("Error al obtener productos en HomePage:", error);
   }
 
-  // Fallback si la base de datos Supabase aún no cuenta con registros cargados
+  // Fallbacks si la base de datos Supabase aún no cuenta con registros cargados
   if (products.length === 0) {
     products = PRODUCTS;
+  }
+  if (featuredProducts.length === 0) {
+    featuredProducts = products.slice(0, 12);
   }
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-12">
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-600 text-white p-8 md:p-12 rounded-3xl shadow-xl text-center space-y-5">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
-        
-        <span className="inline-flex items-center gap-1.5 bg-emerald-500/30 text-emerald-100 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-emerald-400/20">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-          Atención Directa en Santiago, Chile
-        </span>
+      {/* Hero Banner Section with EcoPraha Aesthetics */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white p-8 md:p-14 rounded-3xl shadow-xl text-center space-y-6">
+        {/* Glow ambient background circle */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
+        {/* Minimalist Cat Paw Watermark 🐾 */}
+        <div className="absolute right-6 bottom-6 pointer-events-none opacity-10 text-emerald-300 select-none">
+          <svg className="w-24 h-24 fill-current" viewBox="0 0 24 24">
+            <path d="M12 14c-1.8 0-3.5 1.1-4 2.7-.3.9.2 1.9 1.1 2.2 1.8.6 3.9.6 5.7 0 .9-.3 1.4-1.3 1.1-2.2-.4-1.6-2.1-2.7-3.9-2.7zm-4.5-4c-.8 0-1.5.7-1.5 1.5S6.7 13 7.5 13s1.5-.7 1.5-1.5S8.3 10 7.5 10zm9 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5zm-6.5-3c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5zm4 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z" />
+          </svg>
+        </div>
+
+        {/* Top Badges */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span className="inline-flex items-center gap-1.5 bg-emerald-500/30 text-emerald-200 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-md border border-emerald-400/30 shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+            Atención Directa en Santiago, Chile
+          </span>
+
+          <span className="inline-flex items-center gap-1.5 bg-emerald-400/20 text-emerald-100 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-md border border-emerald-300/30 shadow-xs">
+            <Leaf className="w-3.5 h-3.5 text-emerald-300" />
+            Eco-friendly & Pet-friendly 🐾
+          </span>
+        </div>
+
+        {/* Main Hero Title */}
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight leading-tight">
           Distribuidora Alvarado<br />
           <span className="text-emerald-300 font-extrabold">&quot;Dónde Álvaro&quot;</span>
         </h1>
 
-        <p className="text-emerald-100 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+        <p className="text-emerald-100/90 max-w-2xl mx-auto text-sm md:text-base leading-relaxed font-normal">
           Venta al por mayor y menor de insumos plásticos industriales, frutas y verduras frescas seleccionadas y productos de limpieza de alto rendimiento.
         </p>
       </section>
@@ -49,7 +78,7 @@ export default async function HomePage() {
       {/* Category Redirection Banners */}
       <section className="space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-800">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
             Nuestras Categorías de Productos
           </h2>
           <p className="text-slate-600 text-sm">
@@ -82,8 +111,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products Overview */}
-      <section className="pt-4">
+      {/* Product Carousel Section - Located immediately below category shortcuts */}
+      <ProductCarousel
+        products={featuredProducts}
+        title="Productos Destacados"
+        subtitle="Todo lo que tu negocio y hogar necesitan en un solo lugar"
+      />
+
+      {/* Featured Products Grid */}
+      <section className="pt-4 border-t border-slate-200/60">
         <ProductGrid
           initialProducts={products}
           title="Todos los Productos Disponibles"
@@ -92,9 +128,9 @@ export default async function HomePage() {
       </section>
 
       {/* Business Info Features */}
-      <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-sm">
+      <section className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-800 rounded-2xl border border-emerald-100">
             <Truck className="w-6 h-6 shrink-0" />
           </div>
           <div>
@@ -106,7 +142,7 @@ export default async function HomePage() {
         </div>
 
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-800 rounded-2xl border border-emerald-100">
             <Clock className="w-6 h-6 shrink-0" />
           </div>
           <div>
@@ -118,7 +154,7 @@ export default async function HomePage() {
         </div>
 
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-800 rounded-2xl border border-emerald-100">
             <MapPin className="w-6 h-6 shrink-0" />
           </div>
           <div>
