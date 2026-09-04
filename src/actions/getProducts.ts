@@ -17,13 +17,13 @@ export async function getAllProducts(): Promise<Product[]> {
       .order('name', { ascending: true });
 
     if (productsError) {
-      console.error('[Server Action] Error al consultar todos los productos:', productsError.message);
+      console.error('[DB_ERROR] Error al consultar todos los productos en Supabase');
       return [];
     }
 
     return productsData || [];
-  } catch (err) {
-    console.error('[Server Action] Error inesperado en getAllProducts:', err);
+  } catch {
+    console.error('[DB_ERROR] Excepción inesperada en getAllProducts');
     return [];
   }
 }

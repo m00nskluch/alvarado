@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Product } from '@/lib/database.types';
 import ProductCard from '@/components/ProductCard';
 import { Search, X, SearchX } from 'lucide-react';
+import { sanitizeSearchQuery } from '@/lib/utils';
 
 interface ProductGridProps {
   initialProducts: Product[];
@@ -69,7 +70,7 @@ export function ProductGrid({ initialProducts = [], title, subtitle }: ProductGr
   };
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
+    setSearchTerm(sanitizeSearchQuery(value));
     setVisibleCount(18);
   };
 

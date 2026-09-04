@@ -1,28 +1,41 @@
 'use server';
 
+import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/lib/database.types';
 
+// Esquemas de validación Zod defensivos
+const categorySlugSchema = z.string().trim().regex(/^[a-z0-9-]+$/).max(50);
+const limitSchema = z.number().int().positive().max(100).default(12);
+
 export async function getProductsByCategorySlug(categorySlug: string): Promise<Product[]> {
+  // 1. Validación estricta con Zod
+  const parseResult = categorySlugSchema.safeParse(categorySlug);
+  if (!parseResult.success) {
+    console.warn('[Security] Solicitud rechazada por slug inválido:', categorySlug);
+    return [];
+  }
+  const sanitizedSlug = parseResult.data;
+
   try {
-    // 1. Obtener ID de la categoría por slug
+    // 2. Consulta parametrizada en Supabase (Categoría)
     const { data: categoryData, error: categoryError } = await supabase
       .from('categories')
       .select('id, name, slug')
-      .eq('slug', categorySlug)
+      .eq('slug', sanitizedSlug)
       .maybeSingle();
 
     if (categoryError) {
-      console.error(`[Server Action] Error al buscar categoría "${categorySlug}":`, categoryError.message);
+      console.error('[DB_ERROR] Error al consultar la categoría en la base de datos');
       return [];
     }
 
     if (!categoryData) {
-      console.warn(`[Server Action] No se encontró categoría con slug "${categorySlug}"`);
+      console.warn('[Security] No se encontró categoría activa para el slug parametrizado');
       return [];
     }
 
-    // 2. Obtener productos vinculados al category_id
+    // 3. Consulta parametrizada en Supabase (Productos)
     const { data: productsData, error: productsError } = await supabase
       .from('products')
       .select('id, category_id, name, price, stock_quantity, image_url, is_available')
@@ -31,7 +44,7 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
       .order('name', { ascending: true });
 
     if (productsError) {
-      console.error(`[Server Action] Error al consultar productos para "${categorySlug}":`, productsError.message);
+      console.error('[DB_ERROR] Error al consultar productos por categoría');
       return [];
     }
 
@@ -39,17 +52,17 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
       return productsData;
     }
 
-    // Fallback si la BD Supabase aún no cuenta con registros cargados
+    // Fallback estático seguro si la BD no cuenta con registros cargados
     const { PRODUCTS } = await import('@/data/products');
     const slugMap: Record<string, string> = {
       'plasticos': 'c_plasticos',
       'frutas-y-verduras': 'c_frutas_verduras',
       'limpieza': 'c_limpieza',
     };
-    const targetCatId = slugMap[categorySlug] || categorySlug;
+    const targetCatId = slugMap[sanitizedSlug] || sanitizedSlug;
     return PRODUCTS.filter((p) => p.category_id === targetCatId && p.is_available);
-  } catch (err) {
-    console.error('[Server Action] Error inesperado en getProductsByCategorySlug:', err);
+  } catch {
+    console.error('[DB_ERROR] Excepción inesperada en getProductsByCategorySlug');
     try {
       const { PRODUCTS } = await import('@/data/products');
       const slugMap: Record<string, string> = {
@@ -57,7 +70,7 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
         'frutas-y-verduras': 'c_frutas_verduras',
         'limpieza': 'c_limpieza',
       };
-      const targetCatId = slugMap[categorySlug] || categorySlug;
+      const targetCatId = slugMap[sanitizedSlug] || sanitizedSlug;
       return PRODUCTS.filter((p) => p.category_id === targetCatId && p.is_available);
     } catch {
       return [];
@@ -66,6 +79,10 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
 }
 
 export async function getFeaturedProducts(limit = 12): Promise<Product[]> {
+  // Validación de parámetro limit
+  const limitResult = limitSchema.safeParse(limit);
+  const safeLimit = limitResult.success ? limitResult.data : 12;
+
   try {
     const { data: productsData, error } = await supabase
       .from('products')
@@ -75,26 +92,24 @@ export async function getFeaturedProducts(limit = 12): Promise<Product[]> {
     let activeProducts: Product[] = (productsData && productsData.length > 0) ? productsData : [];
 
     if (error) {
-      console.error('[Server Action] Error al consultar productos destacados en Supabase:', error.message);
+      console.error('[DB_ERROR] Error al obtener productos destacados');
     }
 
-    // Fallback si la BD aún no cuenta con registros cargados
+    // Fallback estático si la BD está vacía
     if (activeProducts.length === 0) {
       const { PRODUCTS } = await import('@/data/products');
       activeProducts = PRODUCTS.filter((p) => p.is_available);
     }
 
-    // Mezcla aleatoria/balanceada
     const shuffled = [...activeProducts].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, limit);
-  } catch (err) {
-    console.error('[Server Action] Error inesperado en getFeaturedProducts:', err);
+    return shuffled.slice(0, safeLimit);
+  } catch {
+    console.error('[DB_ERROR] Excepción inesperada en getFeaturedProducts');
     try {
       const { PRODUCTS } = await import('@/data/products');
-      return PRODUCTS.filter((p) => p.is_available).slice(0, limit);
+      return PRODUCTS.filter((p) => p.is_available).slice(0, safeLimit);
     } catch {
       return [];
     }
   }
 }
-

@@ -12,3 +12,11 @@ export const formatCLP = (amount: number): string => {
     maximumFractionDigits: 0,
   }).format(amount);
 };
+
+/**
+ * Sanitiza cadenas de texto para prevenir inyección de operadores PostgREST y caracteres especiales.
+ */
+export function sanitizeSearchQuery(query: string): string {
+  if (!query) return '';
+  return query.replace(/[,.:()"'%_]/g, '').trim();
+}
