@@ -1,8 +1,12 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { CartProvider } from '@/context/CartContext';
-import CartDrawer from '@/components/CartDrawer';
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/Navbar';
+
+const CartDrawer = dynamic(() => import('@/components/CartDrawer'), {
+  ssr: false,
+});
 
 const inter = Inter({ subsets: ['latin'] });
 
