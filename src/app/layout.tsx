@@ -4,6 +4,8 @@ import { CartProvider } from '@/context/CartContext';
 import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/Navbar';
 
+import MobileBottomCartBar from '@/components/MobileBottomCartBar';
+
 const CartDrawer = dynamic(() => import('@/components/CartDrawer'), {
   ssr: false,
 });
@@ -23,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           {children}
           <CartDrawer/>
+          <MobileBottomCartBar />
         </CartProvider>
       </body>
     </html>
